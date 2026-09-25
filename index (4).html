@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitumen Drum Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #ff9800; padding-bottom: 10px; margin-top: 0; }
+        .row { margin: 15px 0; font-size: 1.1em; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .label { color: #666; font-weight: bold; }
+        .value { color: #222; font-weight: bold; }
+        #error { color: red; display: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Bitumen Drum Info</h2>
+    <div id="loading">Loading data...</div>
+    <div id="error">Data not found. Please verify the QR code.</div>
+    
+    <div id="data-container" style="display: none;">
+        <div class="row"><span class="label">Supplier:</span> <span class="value" id="val-supplier"></span></div>
+        <div class="row"><span class="label">Arrival Date:</span> <span class="value" id="val-date"></span></div>
+        <div class="row"><span class="label">Remaining Stock:</span> <span class="value" id="val-stock" style="color:#d32f2f;"></span></div>
+    </div>
+</div>
+
+<script>
+    // 1. Supabase URL and Key
+    const supabaseUrl = 'https://yvtujoueyotncbvdlgyf.supabase.co'; 
+    const supabaseKey = 'sb_publishable_98O37WT0nSZVw2I9128JOg___CX38Dn'; 
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // 2. Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const drumId = urlParams.get('id');
+
+    async function fetchData() {
+        if (!drumId) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            return;
+        }
+
+        const { data, error } = await client.from('bitumen_drums').select('*').eq('id', drumId).single();
+        document.getElementById('loading').style.display = 'none';
+
+        if (error || !data) {
+            document.getElementById('error').style.display = 'block';
+        } else {
+            document.getElementById('val-supplier').innerText = data.supplier;
+            document.getElementById('val-date').innerText = data.arrival_date;
+            document.getElementById('val-stock').innerText = data.remaining_stock + " Drum";
+            document.getElementById('data-container').style.display = 'block';
+        }
+    }
+    fetchData();
+</script>
+</body>
+</html>
